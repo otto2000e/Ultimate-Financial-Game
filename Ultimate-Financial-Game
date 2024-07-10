@@ -1,0 +1,162 @@
+import random
+
+class FinancialGame:
+    def __init__(self):
+        self.money = 1000
+        self.income = 20000  # Monthly income
+        self.expenses = 2600  # Initial monthly expenses
+        self.months = 60  # Game duration
+        self.income_growth_rate = 0.03  # Monthly income growth rate
+        self.expense_growth_rate = 25  # Monthly expense growth rate
+        self.real_estate_value = 0
+        self.real_estate_appreciation_rate = 0.01  # Monthly appreciation rate
+        self.business_revenue = 0
+        self.business_cost = 0
+        self.has_business = False
+        self.luxury_items = {
+            "mansion": {"cost": 1000000, "maintenance": 5000, "owned": False},
+            "car": {"cost": 50000, "maintenance": 1000, "owned": False},
+            "plane": {"cost": 5000000, "maintenance": 10000, "owned": False}
+        }
+
+    def start_game(self):
+        print("Welcome to the Ultimate Financial Game!")
+        print("You start with $1000.")
+        print("You will receive a monthly income of $20,000 and have initial monthly expenses of $2,600.")
+        print("Make wise financial decisions to maximize your wealth over 60 months.")
+        
+        for month in range(1, self.months + 1):
+            self.print_divider()
+            print(f"Month {month}")
+            self.display_money()
+            self.apply_income_and_expenses()
+            self.player_options()
+            self.random_event()
+            self.expenses += self.expense_growth_rate  # Increase expenses by $25 each month
+            
+        self.end_game()
+
+    def display_money(self):
+        print(f"Current money: ${self.money:.2f}")
+        if self.real_estate_value > 0:
+            print(f"Current real estate value: ${self.real_estate_value:.2f}")
+        if self.has_business:
+            print(f"Current business revenue: ${self.business_revenue:.2f}")
+        for item, details in self.luxury_items.items():
+            if details["owned"]:
+                print(f"Owned {item.capitalize()}: Maintenance cost is ${details['maintenance']:.2f} per month.")
+
+    def apply_income_and_expenses(self):
+        self.money += self.income
+        total_expenses = self.expenses
+        for item, details in self.luxury_items.items():
+            if details["owned"]:
+                total_expenses += details["maintenance"]
+        if self.has_business:
+            total_expenses += self.business_cost
+        
+        self.money -= total_expenses
+        self.income += self.income * self.income_growth_rate  # Growing income
+        print(f"Received income: ${self.income:.2f}")
+        print(f"Paid expenses: ${total_expenses:.2f}")
+
+    def player_options(self):
+        spend = self.get_user_input("spend")
+        self.money -= spend
+        
+        save = self.get_user_input("save")
+        self.money -= save
+        
+        invested = self.get_user_input("invest in stocks")
+        self.money -= invested
+        
+        return_rate = random.uniform(-0.1, 0.2)  # Investment can lose 10% or gain 20%
+        self.money += invested * (1 + return_rate)
+        print(f"Your stock investment return rate for this month is {return_rate * 100:.2f}%")
+
+        if self.money > 5000:
+            self.real_estate_options()
+
+        if not self.has_business and self.money > 10000:
+            self.business_options()
+
+        if self.money > 50000:
+            self.luxury_options()
+
+    def get_user_input(self, action):
+        while True:
+            try:
+                amount = float(input(f"How much do you want to {action} this month? $"))
+                if amount < 0 or amount > self.money:
+                    raise ValueError(f"Invalid amount. You have ${self.money:.2f} available.")
+                return amount
+            except ValueError as e:
+                print(e)
+
+    def real_estate_options(self):
+        while True:
+            choice = input("Do you want to invest in real estate this month? (yes/no) ").lower()
+            if choice in ['yes', 'no']:
+                break
+            print("Invalid choice. Please enter 'yes' or 'no'.")
+        
+        if choice == 'yes':
+            investment = self.get_user_input("invest in real estate")
+            self.money -= investment
+            self.real_estate_value += investment
+            self.real_estate_value += self.real_estate_value * self.real_estate_appreciation_rate
+            print(f"Your real estate value appreciated by {self.real_estate_appreciation_rate * 100:.2f}%")
+
+    def business_options(self):
+        while True:
+            choice = input("Do you want to start a business this month? (yes/no) ").lower()
+            if choice in ['yes', 'no']:
+                break
+            print("Invalid choice. Please enter 'yes' or 'no'.")
+        
+        if choice == 'yes':
+            self.business_cost = self.get_user_input("invest to start your business")
+            self.money -= self.business_cost
+            self.has_business = True
+            self.business_revenue = random.uniform(500, 1500)
+            print(f"Your business started generating revenue of ${self.business_revenue:.2f} per month.")
+
+    def luxury_options(self):
+        for item, details in self.luxury_items.items():
+            if not details["owned"]:
+                while True:
+                    choice = input(f"Do you want to buy a {item} for ${details['cost']}? (yes/no) ").lower()
+                    if choice in ['yes', 'no']:
+                        break
+                    print("Invalid choice. Please enter 'yes' or 'no'.")
+                
+                if choice == 'yes':
+                    self.money -= details["cost"]
+                    details["owned"] = True
+                    print(f"You bought a {item}!")
+
+    def random_event(self):
+        event_chance = random.randint(1, 3)  # 33% chance of a random event
+        if event_chance == 1:
+            event_type = random.choice(["expense", "bonus"])
+            if event_type == "expense":
+                expense = random.uniform(50, 500)
+                self.money -= expense
+                print(f"Unexpected expense of ${expense:.2f} occurred!")
+            else:
+                bonus = random.uniform(50, 500)
+                self.money += bonus
+                print(f"You received a bonus of ${bonus:.2f}!")
+
+    def end_game(self):
+        self.print_divider()
+        print("Game Over!")
+        self.display_money()
+        print("Thank you for playing the Ultimate Financial Game!")
+
+    def print_divider(self):
+        print("\n" + "="*40 + "\n")
+
+if __name__ == "__main__":
+    game = FinancialGame()
+    game.start_game()
